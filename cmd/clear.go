@@ -8,15 +8,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// stopCmd represents the stop command
-var stopCmd = &cobra.Command{
-	Use:   "stop",
-	Short: "Stops the proxy cache server",
+// clearCmd represents the clear command
+var clearCmd = &cobra.Command{
+	Use:   "clear",
+	Short: "Clears the cache for the currently running server",
+
 	Run: func(cmd *cobra.Command, args []string) {
-		internal.StopContainer()
+		internal.ClearCache()
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(stopCmd)
+	rootCmd.AddCommand(clearCmd)
 }

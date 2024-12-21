@@ -3,6 +3,7 @@ package internal
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -155,5 +156,58 @@ func UpdateConfig(origin string, port int) error {
 	}
 
 	return nil
+
+}
+
+func CheckContainerExist() bool {
+
+	ctx := context.Background()
+
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+
+	if err != nil {
+		fmt.Println("Unable to create docker client")
+		panic(err)
+	}
+
+	defer cli.Close()
+
+	containers, err := cli.ContainerList(ctx, container.ListOptions{})
+	if err != nil {
+		panic(err)
+	}
+
+	for _, container := range containers {
+		for _, name := range container.Names {
+			if name[1:] == containerName {
+				return true
+			}
+		}
+	}
+
+	return false
+
+}
+
+func ClearCache() {
+
+	url := fmt.Sprintf("http://localhost:%s/cache", hostPort)
+
+	client := &http.Client{}
+
+	req, err := http.NewRequest(http.MethodDelete, url, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	response, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
+
+	if response.StatusCode != http.StatusOK {
+		fmt.Println("Could not clear cache")
+		return
+	}
 
 }
